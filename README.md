@@ -2,8 +2,8 @@
 <a href="https://naramalhasaniwork.github.io/naramalhasaniWork/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/map-dark.svg"><img src="assets/map-light.svg" alt="Naram Alhasani, systems architect. An animated map of the systems he has built across construction, Formwork and his own products, and how they connect to Claude over MCP."></picture></a>
 
 <p>
-  <a href="https://naramalhasaniwork.github.io/naramalhasaniWork/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/btn-map-dark.svg"><img src="assets/btn-map-light.svg" alt="Explore the interactive map"></picture></a>&nbsp;
-  <a href="https://www.naramalhasani.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/btn-site-dark.svg"><img src="assets/btn-site-light.svg" alt="naramalhasani.com"></picture></a>
+  <a href="https://www.naram.co"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/btn-site-dark.svg"><img src="assets/btn-site-light.svg" alt="Visit naram.co"></picture></a>&nbsp;
+  <a href="https://naramalhasaniwork.github.io/naramalhasaniWork/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/btn-map-dark.svg"><img src="assets/btn-map-light.svg" alt="Explore the interactive map"></picture></a>
 </p>
 
 ## Featured
