@@ -57,7 +57,7 @@ function render(t) {
   EDGES.forEach(([, b], k) => {
     if (b !== 'claude') return;
     const begin = ((k * 0.37) % 1 * 3.2).toFixed(2);
-    p.push(`<circle r="3" fill="${c.accent}"><animateMotion dur="3.2s" begin="${begin}s" repeatCount="indefinite"><mpath href="#e${k}"/></animateMotion><animate attributeName="opacity" dur="3.2s" begin="${begin}s" repeatCount="indefinite" values="0;1;1;0"/></circle>`);
+    p.push(`<circle r="3" fill="${c.accent}" opacity="0"><animateMotion dur="3.2s" begin="${begin}s" repeatCount="indefinite"><mpath href="#e${k}"/></animateMotion><animate attributeName="opacity" dur="3.2s" begin="${begin}s" repeatCount="indefinite" values="0;1;1;0"/></circle>`);
   });
   // nodes
   for (const n of NODES) {
