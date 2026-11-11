@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Naram Alhasani · Systems</title>
+<meta name="description" content="Naram Alhasani, systems architect: an interactive map of the software he has built and how it connects.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a single drawing board. Systems sit in four zones around Claude; hover traces connections, click opens the detail rail. */
+:root {
+  --bg: #f6f6f3; --board: #fcfcfa; --fg: #0b0c0f; --dim: #5d606b; --faint: #b9bbc2; --line: #dcdcd6;
+  --accent: #2334e6; --accent-soft: rgba(35,52,230,.1); --node: #ffffff; --live: #17a34a;
+  --sans: 'Geist', system-ui, -apple-system, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b0c10; --board: #101218; --fg: #eeeff2; --dim: #9a9eab; --faint: #4a4e5a; --line: #23262f;
+  --accent: #7c88ff; --accent-soft: rgba(124,136,255,.14); --node: #161922; --live: #3ccf74; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b0c10; --board: #101218; --fg: #eeeff2; --dim: #9a9eab; --faint: #4a4e5a; --line: #23262f;
+  --accent: #7c88ff; --accent-soft: rgba(124,136,255,.14); --node: #161922; --live: #3ccf74; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 48px; }
+.wrap { max-width: 1320px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 32px; }
+h1 { font-size: clamp(30px, 4.4vw, 52px); font-weight: 600; letter-spacing: -.035em; line-height: 1; margin: 0; }
+.sub { font-family: var(--mono); font-size: 13px; color: var(--dim); margin-top: 10px; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.filters button { font: 500 13px var(--sans); color: var(--dim); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; cursor: pointer; min-height: 34px; }
+.filters button[aria-pressed="true"] { color: var(--fg); border-color: var(--fg); }
+.filters button:focus-visible, .node:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+.board { background: var(--board); border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; position: relative; }
+.board svg { display: block; width: 100%; min-width: 640px; height: auto; }
+
+.zone rect { fill: none; stroke: var(--line); stroke-dasharray: 2 5; }
+.zone text { font: 500 11px var(--mono); fill: var(--dim); letter-spacing: .08em; text-transform: uppercase; }
+.grid circle { fill: var(--line); }
+
+.edge { stroke: var(--faint); stroke-width: 1.2; fill: none; transition: stroke .2s, opacity .2s; }
+.edge.mcp { stroke-dasharray: 4 4; }
+.elabel { font: 10.5px var(--mono); fill: var(--dim); opacity: 0; transition: opacity .2s; paint-order: stroke; stroke: var(--board); stroke-width: 4px; }
+.pulse { fill: var(--accent); }
+
+.node { cursor: pointer; outline: none; transition: opacity .2s; }
+.node rect { fill: var(--node); stroke: var(--fg); stroke-width: 1.1; transition: fill .2s, stroke .2s; }
+.node .nm { font: 600 15px var(--sans); fill: var(--fg); letter-spacing: -.01em; }
+.node .kd { font: 11px var(--mono); fill: var(--dim); }
+.node .dot { fill: var(--live); }
+.node.hub rect { fill: var(--fg); }
+.node.hub .nm { fill: var(--board); }
+.node.hub .kd { fill: var(--faint); }
+
+.board.focus .node { opacity: .25; }
+.board.focus .edge { opacity: .2; }
+.board.focus .node.on { opacity: 1; }
+.board.focus .edge.on { opacity: 1; stroke: var(--accent); }
+.board.focus .elabel.on { opacity: 1; }
+.board.focus .node.sel rect { stroke: var(--accent); stroke-width: 2; }
+.board .node.off, .board .edge.off { opacity: .08 !important; pointer-events: none; }
+
+aside { background: var(--board); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: grid; gap: 14px; min-width: 0; }
+aside .k { font: 12px var(--mono); color: var(--dim); }
+aside h2 { margin: 0; font-size: 26px; font-weight: 600; letter-spacing: -.025em; }
+aside p { margin: 0; line-height: 1.6; font-size: 15px; }
+aside .status { font: 12.5px var(--mono); color: var(--dim); display: flex; align-items: center; gap: 8px; }
+aside .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--live); }
+aside .status.private::before { background: var(--faint); }
+aside ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 14px; }
+aside li { font: 12.5px var(--mono); color: var(--dim); display: flex; justify-content: space-between; gap: 10px; }
+aside li b { font-weight: 500; color: var(--fg); }
+aside a { color: var(--accent); font: 500 14px var(--sans); text-decoration: none; }
+aside a:hover { text-decoration: underline; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 22px; font: 12px var(--mono); color: var(--dim); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend i { width: 22px; border-top: 1.4px solid var(--faint); display: inline-block; }
+.legend i.d { border-top-style: dashed; }
+@media (prefers-reduced-motion: reduce) { .pulse { display: none; } * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Naram Alhasani</h1>
+      <div class="sub">Systems architect · the software I've built, and how it connects</div>
+    </div>
+    <div class="filters" role="group" aria-label="Filter by area">
+      <button type="button" data-z="all" aria-pressed="true">All</button>
+      <button type="button" data-z="construction" aria-pressed="false">Construction</button>
+      <button type="button" data-z="formwork" aria-pressed="false">Formwork</button>
+      <button type="button" data-z="products" aria-pressed="false">Products</button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <div class="board" id="board">
+      <svg id="map" viewBox="0 0 1200 700" role="img" aria-label="Map of Naram's systems and how they connect"></svg>
+    </div>
+    <aside id="detail" aria-live="polite"></aside>
+  </div>
+
+  <div class="legend">
+    <span><i class="d"></i>connects to Claude over MCP</span>
+    <span><i></i>direct integration</span>
+    <span>hover to trace · click for details</span>
+  </div>
+</div>
+
+<script type="module">
+const { nodes: NODES, edges: EDGES, zones: ZONES } = await (await fetch('systems.json')).json();
+
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('map'), board = document.getElementById('board'), detail = document.getElementById('detail');
+const el = (t, a = {}, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+const byId = Object.fromEntries(NODES.map(n => [n.id, n]));
+const width = n => n.hub ? 132 : Math.max(n.name.length * 9.4, n.kind.length * 6.9) + 44;
+
+// Dot grid
+const g0 = el('g', { class: 'grid' }, svg);
+for (let x = 20; x < 1200; x += 40) for (let y = 20; y < 700; y += 40) el('circle', { cx: x, cy: y, r: 1 }, g0);
+// Zones
+for (const z of ZONES) { const g = el('g', { class: 'zone', 'data-z': z.id }, svg); el('rect', { x: z.x, y: z.y, width: z.w, height: z.h, rx: 12 }, g); el('text', { x: z.x + 16, y: z.y + 24 }, g).textContent = z.label; }
+
+// Edges
+const edgeEls = EDGES.map(([a, b, type, label], i) => {
+  const A = byId[a], B = byId[b];
+  const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+  const path = el('path', { d: `M${A.x},${A.y} L${B.x},${B.y}`, class: `edge ${type}` }, svg);
+  const t = el('text', { x: mx, y: my - 6, 'text-anchor': 'middle', class: 'elabel' }, svg); t.textContent = label;
+  return { a, b, type, path, t, len: Math.hypot(B.x - A.x, B.y - A.y), offset: i * 0.37 };
+});
+
+// Pulses on MCP edges, travelling toward Claude
+const pulses = edgeEls.filter(e => e.type === 'mcp' || e.b === 'claude').map(e => ({ e, c: el('circle', { r: 3, class: 'pulse' }, svg) }));
+
+// Nodes
+const nodeEls = {};
+for (const n of NODES) {
+  const w = width(n), h = 46;
+  const g = el('g', { class: 'node' + (n.hub ? ' hub' : ''), tabindex: 0, role: 'button', 'aria-label': `${n.name}: ${n.kind}`, transform: `translate(${n.x - w / 2},${n.y - h / 2})` }, svg);
+  el('rect', { width: w, height: h, rx: 7 }, g);
+  el('text', { x: 14, y: 20, class: 'nm' }, g).textContent = n.name;
+  el('text', { x: 14, y: 36, class: 'kd' }, g).textContent = n.kind;
+  if (n.status && n.status !== 'Private') el('circle', { cx: w - 13, cy: 15, r: 3.5, class: 'dot' }, g);
+  g.addEventListener('mouseenter', () => focus(n.id));
+  g.addEventListener('mouseleave', () => focus(selected));
+  g.addEventListener('click', () => select(n.id));
+  g.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); select(n.id); } });
+  g.addEventListener('focus', () => focus(n.id));
+  nodeEls[n.id] = g;
+}
+
+let selected = null, zone = 'all';
+function focus(id) {
+  board.classList.toggle('focus', !!id);
+  const on = new Set(id ? [id] : []);
+  for (const e of edgeEls) { const hit = id && (e.a === id || e.b === id); e.path.classList.toggle('on', !!hit); e.t.classList.toggle('on', !!hit); if (hit) { on.add(e.a); on.add(e.b); } }
+  for (const k in nodeEls) { nodeEls[k].classList.toggle('on', on.has(k)); nodeEls[k].classList.toggle('sel', k === selected); }
+}
+function select(id) { selected = selected === id ? null : id; focus(selected); render(selected); }
+
+function render(id) {
+  if (!id) {
+    const mcp = EDGES.filter(e => e[2] === 'mcp').length;
+    detail.innerHTML = `<div class="k">overview</div><h2>${NODES.length - 1} systems</h2>
+      <p>Construction software for general contractors, the tools that run Formwork, and products of my own. ${mcp} of them connect to Claude over MCP.</p>
+      <ul>${ZONES.map(z => `<li><span>${z.label}</span><b>${NODES.filter(n => n.zone === z.id).length}</b></li>`).join('')}
+      <li><span>MCP tools exposed</span><b>532+</b></li></ul>
+      <a href="https://www.naramalhasani.com" target="_blank" rel="noopener">naramalhasani.com →</a>`;
+    return;
+  }
+  const n = byId[id];
+  const links = edgeEls.filter(e => e.a === id || e.b === id).map(e => { const o = byId[e.a === id ? e.b : e.a]; return `<li><span>${o.name}</span><b>${e.t.textContent}</b></li>`; }).join('');
+  detail.innerHTML = `<div class="k">${n.kind}</div><h2>${n.name}</h2>
+    ${n.status ? `<div class="status${n.status === 'Private' ? ' private' : ''}">${n.status}</div>` : ''}
+    <p>${n.does}</p>${links ? `<ul>${links}</ul>` : ''}
+    ${n.url ? `<a href="${n.url}" target="_blank" rel="noopener">Open ${n.name} →</a>` : ''}`;
+}
+
+document.querySelectorAll('.filters button').forEach(b => b.addEventListener('click', () => {
+  zone = b.dataset.z;
+  document.querySelectorAll('.filters button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  for (const n of NODES) nodeEls[n.id].classList.toggle('off', zone !== 'all' && !n.hub && n.zone !== zone);
+  for (const e of edgeEls) { const A = byId[e.a], B = byId[e.b]; const vis = zone === 'all' || [A, B].every(x => x.hub || x.zone === zone); e.path.classList.toggle('off', !vis); e.t.classList.toggle('off', !vis); }
+}));
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function tick(t) {
+  for (const p of pulses) {
+    const { e } = p; const A = byId[e.a], B = byId[e.b];
+    const k = ((t / 1000) / 3.2 + e.offset) % 1;
+    p.c.setAttribute('cx', A.x + (B.x - A.x) * k); p.c.setAttribute('cy', A.y + (B.y - A.y) * k);
+    p.c.setAttribute('opacity', e.path.classList.contains('off') ? 0 : Math.sin(Math.PI * k).toFixed(2));
+  }
+  if (!reduce) requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+render(null);
+</script>
+
+</body>
+</html>

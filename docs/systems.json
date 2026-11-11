@@ -1,0 +1,256 @@
+{
+  "nodes": [
+    {
+      "id": "claude",
+      "name": "Claude",
+      "kind": "AI model",
+      "zone": "hub",
+      "x": 600,
+      "y": 360,
+      "hub": true,
+      "does": "Most of these systems expose their data and actions to Claude over MCP, so Claude can do real work inside them with each person's own permissions."
+    },
+    {
+      "id": "matter",
+      "name": "MATTER",
+      "kind": "construction platform",
+      "zone": "construction",
+      "x": 300,
+      "y": 205,
+      "url": "https://onmatter.co",
+      "status": "Live",
+      "does": "Project platform for general contractors: RFIs, submittals, bids, contracts and chat in one place, showing who owes the next move."
+    },
+    {
+      "id": "delta",
+      "name": "Delta Portal",
+      "kind": "MATTER deployment",
+      "zone": "construction",
+      "x": 150,
+      "y": 110,
+      "status": "Live",
+      "does": "Delta Construction's deployment of MATTER. It replaced Procore and runs about 180 active projects."
+    },
+    {
+      "id": "estimating",
+      "name": "Delta Estimating",
+      "kind": "bid pipeline",
+      "zone": "construction",
+      "x": 140,
+      "y": 300,
+      "status": "Live",
+      "does": "Shows Delta's estimators what they are bidding and when: each bid gets a slot with a name, dates and hours."
+    },
+    {
+      "id": "toolkit",
+      "name": "Contractor Toolkit",
+      "kind": "Claude Code plugins",
+      "zone": "construction",
+      "x": 350,
+      "y": 335,
+      "url": "https://github.com/Sunrise-Systems/contractor-toolkit",
+      "status": "Open source",
+      "does": "Free Claude Code plugins for contractors. Claude drafts estimates, bid packages, RFIs and daily logs in the company's brand."
+    },
+    {
+      "id": "c0",
+      "name": "C0",
+      "kind": "operations system",
+      "zone": "formwork",
+      "x": 870,
+      "y": 262,
+      "status": "Live",
+      "does": "Runs Formwork day to day: clients, projects, tasks and invoices in one place, synced with the books."
+    },
+    {
+      "id": "outreach",
+      "name": "OutreachSphere",
+      "kind": "sales CRM",
+      "zone": "formwork",
+      "x": 1060,
+      "y": 110,
+      "url": "https://outreachsphere.arena.fm/",
+      "status": "Live",
+      "does": "Fills in missing contacts on a lead list, runs email and LinkedIn sequences, and sorts the replies."
+    },
+    {
+      "id": "content",
+      "name": "ContentSphere",
+      "kind": "content system",
+      "zone": "formwork",
+      "x": 1060,
+      "y": 320,
+      "status": "Live",
+      "does": "Plans and drafts each client's newsletters, LinkedIn posts and web copy. The client approves every piece."
+    },
+    {
+      "id": "thronos",
+      "name": "Thronos",
+      "kind": "agent platform",
+      "zone": "formwork",
+      "x": 760,
+      "y": 105,
+      "status": "Private",
+      "does": "Teams of AI agents that run on a schedule, read a company's systems, draft the work and send each decision to a person."
+    },
+    {
+      "id": "sigil",
+      "name": "SIGIL",
+      "kind": "synthesizer",
+      "zone": "products",
+      "x": 250,
+      "y": 560,
+      "url": "https://github.com/naramalhasaniWork/sigil",
+      "status": "Public",
+      "does": "A synth with six sound engines that runs in a browser tab or as a VST3 plugin in your DAW."
+    },
+    {
+      "id": "orbit",
+      "name": "Orbit",
+      "kind": "AI testing",
+      "zone": "products",
+      "x": 480,
+      "y": 610,
+      "status": "In development",
+      "does": "Point it at a GitHub repo and it tests the app in a real browser, riskiest journeys first, and explains failures in plain English."
+    },
+    {
+      "id": "tidytwo",
+      "name": "TidyTwo",
+      "kind": "household app",
+      "zone": "products",
+      "x": 720,
+      "y": 610,
+      "status": "Live",
+      "does": "Shared household app: chores, routines, lists, notes and a family board, with a weekly split of who did what."
+    },
+    {
+      "id": "polyquant",
+      "name": "PolyQuant",
+      "kind": "market scanner",
+      "zone": "products",
+      "x": 950,
+      "y": 560,
+      "status": "Private",
+      "does": "Scans Polymarket and Kalshi for pricing gaps and paper-trades them against live order books before any real money."
+    }
+  ],
+  "edges": [
+    [
+      "matter",
+      "claude",
+      "mcp",
+      "234 tools"
+    ],
+    [
+      "c0",
+      "claude",
+      "mcp",
+      "194 tools"
+    ],
+    [
+      "outreach",
+      "claude",
+      "mcp",
+      "104 tools"
+    ],
+    [
+      "sigil",
+      "claude",
+      "mcp",
+      "MCP"
+    ],
+    [
+      "orbit",
+      "claude",
+      "mcp",
+      "MCP"
+    ],
+    [
+      "tidytwo",
+      "claude",
+      "mcp",
+      "MCP"
+    ],
+    [
+      "thronos",
+      "claude",
+      "direct",
+      "Agent SDK"
+    ],
+    [
+      "toolkit",
+      "claude",
+      "direct",
+      "plugins"
+    ],
+    [
+      "delta",
+      "matter",
+      "direct",
+      "deploys"
+    ],
+    [
+      "toolkit",
+      "matter",
+      "direct",
+      "publishes scopes"
+    ],
+    [
+      "thronos",
+      "c0",
+      "direct",
+      "reads"
+    ],
+    [
+      "thronos",
+      "outreach",
+      "direct",
+      "reads"
+    ],
+    [
+      "thronos",
+      "content",
+      "direct",
+      "reads"
+    ],
+    [
+      "c0",
+      "outreach",
+      "direct",
+      "syncs"
+    ],
+    [
+      "c0",
+      "content",
+      "direct",
+      "syncs"
+    ]
+  ],
+  "zones": [
+    {
+      "id": "construction",
+      "label": "Construction",
+      "x": 30,
+      "y": 50,
+      "w": 440,
+      "h": 340
+    },
+    {
+      "id": "formwork",
+      "label": "Formwork",
+      "x": 680,
+      "y": 50,
+      "w": 480,
+      "h": 340
+    },
+    {
+      "id": "products",
+      "label": "Products",
+      "x": 120,
+      "y": 480,
+      "w": 960,
+      "h": 190
+    }
+  ]
+}
